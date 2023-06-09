@@ -1,0 +1,72 @@
+---
+title: "GMPD Exploration"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# what group of mammals is the sickest?
+
+our research group wants to know which group of animals (between carnivores, primates, or ungulates) is the sickest overall. to answer this question, we will use data from the Global Parasite Database (GMPD).
+
+More information about the GMPD can be found in [this publication] (https://esajournals.onlinelibrary.wiley.com/doi/10.1002/ecy.1799)
+
+#the data we need to answer this question is in the main part of the GMPD dataset.
+library(tidyverse)
+gmpd_main <- readr::read_csv("GMPD_data/GMPD_main.csv")
+
+
+#to look at the first few rows of dataset to see if it is read properly 
+head(gmpd_main)
+
+#or
+dplyr::glimpse(gmpd_main)
+
+#two variables we might be able to use to determine which group is the sickets are 'prevalence' or 'intensity'. however, from the quick summary, 'intensity' group might have a lot of missinig values, so we will check that.
+is.na(gmpd_main$Prevalence)
+
+# to see how much data is missing/na/0 in the prevalence column
+gmpd_main$Prevalence %>%
+is.na() %>%
+sum()
+
+#copy the code above and change the Prevalence data to intensity data
+gmpd_main$Intensity %>%
+is.na() %>%
+sum()
+
+#the codes above outlines that there are 3844 missing data under prevalence and 20835 missing entries in the intensity dataset.
+
+
+
+#Format the proportion as a percent and round to two decimal places for pretty output 
+
+get_prop_missing <- function(x) {
+out <- x %>% is.na() %>% mean()
+out <- (out*100) %>% round(digits = 2)
+return(out)}
+
+get_prop_missing(gmpd_main$Prevalence)
+
+
+apply(gmpd_main, MARGIN = 2, FUN=get_prop_missing)
+
+#To get the mean and standard deviation of prevalence for each group and deleting the NA Values with na.rm = TRUE
+means_table
+gmpd_main %>% 
+dplyr::group_by(Group) %>%
+dplyr::summarize(
+mean = mean(Prevalence,na.rm = TRUE),
+st_dev = sd(Prevalence, na.rm = TRUE),
+)
+
+#to make graphs (i dont think it is working)
+barplot(mean~Group, data=mean_table)
+
+ggplot(means_table)
+aes(x = Group, y = mean
+)
+geom_col()
+
